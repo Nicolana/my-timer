@@ -1,0 +1,11 @@
+@font-face {
+    font-family: clockicons;
+    src: url(~@/assets/fonts/clockicons/clockicons.eot#iefix) format('embedded-opentype'),
+    url(~@/assets/fonts/clockicons/clockicons.woff2) format('woff2'),
+    url(~@/assets/fonts/clockicons/clockicons.woff) format('woff'),
+    url(~@/assets/fonts/clockicons/clockicons.ttf) format('truetype'),
+    url(~@/assets/fonts/clockicons/clockicons.svg) format('svg');
+    font-weight: 400;
+    font-style: normal
+}
+
