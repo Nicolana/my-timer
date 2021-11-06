@@ -1,29 +1,20 @@
-# my-timer
+# ⏰  闹钟房间
 
-## Project setup
-```
-yarn install
-```
+基于 **Electron + Vue3 + TypeScript** 开发的一个简约桌面定时器+闹钟（闹钟还没实现 - 假装有闹钟）
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+[![IQF2ct.png](https://z3.ax1x.com/2021/11/06/IQF2ct.png)](https://imgtu.com/i/IQF2ct)
 
-### Compiles and minifies for production
-```
-yarn build
+## 下载地址
+
+```angular2html
+https://github.com/Nicolana/my-timer/releases/download/v0.0.1/my-timer.Setup.0.1.0.exe
 ```
 
-### Run your unit tests
-```
-yarn test:unit
-```
+## 开发计划
+- [x] 基础倒计时功能
+- [ ] 修改logo
+- [ ] 计时结束铃声提醒功能
+- [ ] 自定义铃声共鞥你
+- [ ] 倒计时备注功能
+- [ ] 倒计时设置记忆功能
 
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
