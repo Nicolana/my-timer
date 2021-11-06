@@ -1,4 +1,6 @@
-import { app, protocol, BrowserWindow } from 'electron';
+import {
+  app, protocol, BrowserWindow, Menu,
+} from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer';
 
@@ -34,8 +36,59 @@ async function createWindow() {
     // Load the index.html when not in development
     win.loadURL('app://./index.html');
   }
-}
 
+
+  const template = [
+    {
+      label: '文件',
+      submenu: [
+        {
+          label: '退出',
+          click: () => {
+            app.quit();
+          },
+        },
+      ],
+    },
+    {
+      label: '帮助',
+      submenu: [
+        {
+          label: '关于我们',
+          click: async () => {
+            let sonWin: null | BrowserWindow = new BrowserWindow({
+              width: 400,
+              height: 200,
+              parent: win,
+              autoHideMenuBar: true,
+              webPreferences: {
+                nodeIntegration: true,
+              },
+            });
+
+            if (process.env.WEBPACK_DEV_SERVER_URL) {
+              // Load the url of the dev server if in development mode
+              const host = process.env.WEBPACK_DEV_SERVER_URL as string;
+              await sonWin.loadURL(`${host}#/about`);
+              if (!process.env.IS_TEST) win.webContents.openDevTools();
+            } else {
+              createProtocol('app');
+              sonWin.loadURL('app://./index.html#/about');
+            }
+            sonWin.on('closed', () => {
+              sonWin = null;
+            });
+          },
+        },
+      ],
+    },
+  ];
+
+  const myMenu = Menu.buildFromTemplate(template);
+
+  Menu.setApplicationMenu(myMenu);
+
+}
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
