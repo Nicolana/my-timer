@@ -13,6 +13,7 @@ https://github.com/Nicolana/my-timer/releases/download/v0.0.1/my-timer.Setup.0.1
 ## 开发计划
 - [x] 基础倒计时功能
 - [x] 修改logo
+- [x] 修改打包后的包以及应用名称
 - [ ] 计时结束铃声提醒功能
 - [ ] 自定义铃声共鞥你
 - [ ] 倒计时备注功能
