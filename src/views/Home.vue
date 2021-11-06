@@ -70,6 +70,48 @@
           </div>
         </div>
       </div>
+      <div class="edit-item-wrapper mt-4">
+        <div class="edit-item-title">
+          声音
+        </div>
+        <div class="edit-item-content">
+          <div class="flex items-center select-none">
+            <el-select v-model="audioOptionIndex" placeholder="选择提示音频" class="audio-select">
+              <el-option
+                v-for="(item, index) in audioOptions"
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+            <div class="cursor-pointer
+                        ml-1
+                        mr-3
+                        pl-4
+                        pr-4
+                        border-solid
+                        border-gray-200
+                        border-2
+                        bg-gray-200
+                        flex
+                        items-center
+                        justify-center
+                        h-10"
+                 @click="onPlayMusic"
+            >
+              <el-icon v-if="!audioPlying">
+                <video-play />
+              </el-icon>
+              <el-icon v-else><video-pause /></el-icon>
+            </div>
+            <el-checkbox v-model="isAudioLoop" label="循环播放"></el-checkbox>
+          </div>
+        </div>
+        <audio controls class="hidden" id="audio" ref="audio" :loop="isAudioLoop">
+          <source src="@/assets/audio/xylophone.mp3" type="audio/mpeg">
+        </audio>
+      </div>
     </div>
 
     <template #footer>
@@ -83,7 +125,7 @@
 
 <script lang="ts">
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { ArrowDown } from '@element-plus/icons';
+import { ArrowDown, VideoPlay, VideoPause } from '@element-plus/icons';
 import {
   computed, defineComponent, reactive, ref,
 } from 'vue';
@@ -104,6 +146,8 @@ export default defineComponent({
   name: 'Home',
   components: {
     ArrowDown,
+    VideoPlay,
+    VideoPause,
   },
   setup() {
     const dialogVisible = ref<boolean>(false);
@@ -197,18 +241,45 @@ export default defineComponent({
       isRunning.value = false;
       countDownSeconds.value = 0;
     };
+    const audio = ref<null | HTMLAudioElement>(null);
+    const isAudioLoop = ref<boolean>(true);
+    const audioOptions = ref([
+      {
+        value: 0,
+        label: '木琴',
+      },
+    ]);
+    const audioOptionIndex = ref(0);
+    const audioPlying = ref(false);
+    const onPlayMusic = () => {
+      if (audioPlying.value) {
+        // eslint-disable-next-line no-unused-expressions
+        audio.value?.pause();
+        audioPlying.value = false;
+        return;
+      }
+      audioPlying.value = true;
+      // eslint-disable-next-line no-unused-expressions
+      audio.value?.play();
+    };
     return {
+      audio,
       hours,
       minutes,
       seconds,
+      audioPlying,
+      isAudioLoop,
       dialogVisible,
       timerTypeRadio,
       timerListHours,
       timerIndex,
       isRunning,
+      audioOptions,
+      audioOptionIndex,
       countDownSecText,
       startTimer,
       resetTimer,
+      onPlayMusic,
       closeDialog,
       onTimerClick,
       onEditTimerConfirm,
@@ -249,5 +320,11 @@ export default defineComponent({
 .timer-dropdown-menu {
   height: 200px;
   overflow: auto;
+}
+
+.audio-select .el-icon {
+  height: 100%!important;
+  display: flex;
+  align-items: center;
 }
 </style>
