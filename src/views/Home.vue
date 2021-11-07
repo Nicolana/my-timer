@@ -76,7 +76,9 @@
         </div>
         <div class="edit-item-content">
           <div class="flex items-center select-none">
-            <el-select v-model="audioOptionIndex" placeholder="选择提示音频" class="audio-select">
+            <el-select v-model="audioOptionIndex"
+                       placeholder="选择提示音频"
+                       class="audio-select flex-grow">
               <el-option
                 v-for="(item, index) in audioOptions"
                 :key="index"
@@ -108,9 +110,6 @@
             <el-checkbox v-model="isAudioLoop" label="循环播放"></el-checkbox>
           </div>
         </div>
-        <audio controls class="hidden" id="audio" ref="audio" :loop="isAudioLoop">
-          <source src="@/assets/audio/xylophone.mp3" type="audio/mpeg">
-        </audio>
       </div>
     </div>
 
@@ -121,6 +120,25 @@
       </span>
     </template>
   </el-dialog>
+  <el-dialog v-model="stopDialogVisible" title="计时器" custom-class="stop-dialog">
+    <div class="stop-dialog-content">
+      <div class="logo-wrapper">
+      </div>
+      <div class="text-lg text-center">{{ totalCountText }}</div>
+      <div class="text-lg text-center">
+        备注blablablabla
+      </div>
+    </div>
+    <template #footer>
+      <div class="dialog-footer flex justify-center">
+        <el-button type="success" class="stop-restart-button">重新开始</el-button>
+        <el-button type="danger" class="stop-confirm-button">确定</el-button>
+      </div>
+    </template>
+  </el-dialog>
+  <audio controls class="hidden" id="audio" ref="audio" :loop="isAudioLoop">
+    <source src="@/assets/audio/xylophone.mp3" type="audio/mpeg">
+  </audio>
 </template>
 
 <script lang="ts">
@@ -155,8 +173,11 @@ export default defineComponent({
     const timerListHours = ref<any>([]);
     const countDownSeconds = ref<number>(0);
     const isRunning = ref<null | boolean>(false);
+    // 倒计时停止界面
+    const stopDialogVisible = ref(true);
     let startTime: moment.Moment | null = null;
-    let total = 0;
+    const total = ref<number>(0);
+    const totalCount = ref<number>(0);
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < 100; i++) {
       const val = i.toString().padStart(2, '0');
@@ -195,20 +216,20 @@ export default defineComponent({
       timerIndex.hourIndex = 0;
       timerIndex.minuteIndex = 0;
       timerIndex.secondIndex = 0;
-      console.log('dialog!!!');
     };
     const countDown = () => {
       timer.value = setTimeout(() => {
         const diff = moment().diff(startTime, 'seconds');
-        if (total - diff < 0) {
+        if (total.value - diff < 0) {
           clearTimeout(timer.value);
           isRunning.value = false;
           timer.value = undefined;
           countDownSeconds.value = 0;
           sendNotification('🍕计时结束啦!');
+          stopDialogVisible.value = true;
           return;
         }
-        countDownSeconds.value = total - diff;
+        countDownSeconds.value = total.value - diff;
         countDown();
       }, 50);
     };
@@ -222,7 +243,7 @@ export default defineComponent({
       if (isRunning.value) {
         clearTimeout(timer.value);
         isRunning.value = false;
-        total = countDownSeconds.value;
+        total.value = countDownSeconds.value;
         return;
       }
       isRunning.value = true;
@@ -230,8 +251,10 @@ export default defineComponent({
       countDown();
     };
     const onEditTimerConfirm = () => {
-      total = Number(hours.value) * 60 * 60 + Number(minutes.value) * 60 + Number(seconds.value);
-      countDownSeconds.value = total;
+      // eslint-disable-next-line max-len
+      total.value = Number(hours.value) * 60 * 60 + Number(minutes.value) * 60 + Number(seconds.value);
+      countDownSeconds.value = total.value;
+      totalCount.value = total.value;
       startTimer();
       closeDialog();
     };
@@ -262,16 +285,26 @@ export default defineComponent({
       // eslint-disable-next-line no-unused-expressions
       audio.value?.play();
     };
+
+    const totalCountText = computed(() => {
+      const time = moment.duration(totalCount.value, 'seconds');
+      const input = { h: time.hours(), m: time.minutes(), s: time.seconds() };
+      return moment(input).format('HH:mm:ss');
+    });
+
     return {
       audio,
       hours,
       minutes,
       seconds,
+      totalCount,
+      totalCountText,
       audioPlying,
       isAudioLoop,
       dialogVisible,
       timerTypeRadio,
       timerListHours,
+      stopDialogVisible,
       timerIndex,
       isRunning,
       audioOptions,
@@ -326,5 +359,32 @@ export default defineComponent({
   height: 100%!important;
   display: flex;
   align-items: center;
+}
+
+.stop-dialog .el-dialog__header{
+  background-color: #EF6262;
+}
+
+.stop-dialog .el-dialog__title {
+  color: #fff;
+}
+
+.stop-dialog .el-dialog__close {
+  color: #fff;
+}
+
+.stop-dialog .el-dialog__footer {
+  background-color: #fcfcfc;
+  border-top: 1px solid #e5e5e5;
+}
+
+.stop-restart-button {
+  background-color: #4aae71;
+  border-color: #4aae71;
+  min-width: 100px;
+}
+
+.stop-confirm-button {
+  min-width: 100px;
 }
 </style>
