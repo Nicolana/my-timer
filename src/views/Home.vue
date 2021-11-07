@@ -131,8 +131,12 @@
     </div>
     <template #footer>
       <div class="dialog-footer flex justify-center">
-        <el-button type="success" class="stop-restart-button">重新开始</el-button>
-        <el-button type="danger" class="stop-confirm-button">确定</el-button>
+        <el-button type="success"
+                   class="stop-restart-button"
+                   @click="continueTimer">重新开始</el-button>
+        <el-button type="danger"
+                   class="stop-confirm-button"
+                   @click="onStopConfirm">确定</el-button>
       </div>
     </template>
   </el-dialog>
@@ -174,7 +178,7 @@ export default defineComponent({
     const countDownSeconds = ref<number>(0);
     const isRunning = ref<null | boolean>(false);
     // 倒计时停止界面
-    const stopDialogVisible = ref(true);
+    const stopDialogVisible = ref(false);
     let startTime: moment.Moment | null = null;
     const total = ref<number>(0);
     const totalCount = ref<number>(0);
@@ -183,6 +187,32 @@ export default defineComponent({
       const val = i.toString().padStart(2, '0');
       timerListHours.value.push(val);
     }
+    const audio = ref<null | HTMLAudioElement>(null);
+    const isAudioLoop = ref<boolean>(true);
+    const audioOptions = ref([
+      {
+        value: 0,
+        label: '木琴',
+      },
+    ]);
+    const audioOptionIndex = ref(0);
+    const audioPlying = ref(false);
+    const onPlayMusic = () => {
+      if (audioPlying.value) {
+        // eslint-disable-next-line no-unused-expressions
+        audio.value?.pause();
+        audioPlying.value = false;
+        return;
+      }
+      audioPlying.value = true;
+      // eslint-disable-next-line no-unused-expressions
+      audio.value?.play();
+    };
+    const stopMusic = () => {
+      // eslint-disable-next-line no-unused-expressions
+      audio.value?.pause();
+      audioPlying.value = false;
+    };
     const timerIndex = reactive({
       hourIndex: 0,
       minuteIndex: 0,
@@ -227,6 +257,7 @@ export default defineComponent({
           countDownSeconds.value = 0;
           sendNotification('🍕计时结束啦!');
           stopDialogVisible.value = true;
+          onPlayMusic();
           return;
         }
         countDownSeconds.value = total.value - diff;
@@ -264,34 +295,26 @@ export default defineComponent({
       isRunning.value = false;
       countDownSeconds.value = 0;
     };
-    const audio = ref<null | HTMLAudioElement>(null);
-    const isAudioLoop = ref<boolean>(true);
-    const audioOptions = ref([
-      {
-        value: 0,
-        label: '木琴',
-      },
-    ]);
-    const audioOptionIndex = ref(0);
-    const audioPlying = ref(false);
-    const onPlayMusic = () => {
-      if (audioPlying.value) {
-        // eslint-disable-next-line no-unused-expressions
-        audio.value?.pause();
-        audioPlying.value = false;
-        return;
-      }
-      audioPlying.value = true;
-      // eslint-disable-next-line no-unused-expressions
-      audio.value?.play();
-    };
 
     const totalCountText = computed(() => {
       const time = moment.duration(totalCount.value, 'seconds');
       const input = { h: time.hours(), m: time.minutes(), s: time.seconds() };
       return moment(input).format('HH:mm:ss');
     });
-
+    const closeStopDialog = () => {
+      stopDialogVisible.value = false;
+    };
+    const onStopConfirm = () => {
+      stopMusic();
+      closeStopDialog();
+    };
+    const continueTimer = () => {
+      stopMusic();
+      total.value = totalCount.value;
+      countDownSeconds.value = total.value;
+      startTimer();
+      closeStopDialog();
+    };
     return {
       audio,
       hours,
@@ -312,6 +335,8 @@ export default defineComponent({
       countDownSecText,
       startTimer,
       resetTimer,
+      continueTimer,
+      onStopConfirm,
       onPlayMusic,
       closeDialog,
       onTimerClick,
